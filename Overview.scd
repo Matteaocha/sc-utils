@@ -104,4 +104,29 @@ ENVIRONMENTS
 - a = Environment.make({ ~aLocalVar = 100 })
 - a.use({ ~aLocalVar.postln })
 
+----------------------------------------------------------------
+
+CLASSES
+
+ClassName : InheritsFrom {
+    var localvar, <varWithGetter, >varWithSetter, <>setterGetter;
+
+    *classMethod {
+        ^returnObject;
+    }
+
+    instanceMethod {
+        this.otherInstanceMethod();
+    }
+
+    otherInstanceMethod {}
+
+    *new { |arg1, arg2| ^super.new.init(arg1, arg2); }
+
+    init { |arg1, arg2| }
+}
+
+Platform.userExtensionDir;   // Extensions available only to your user account
+Platform.systemExtensionDir; // Extensions available to all users on the machine
+
 */
