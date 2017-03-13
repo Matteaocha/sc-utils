@@ -126,7 +126,6 @@ ClassName : InheritsFrom {
     init { |arg1, arg2| }
 }
 
-Platform.userExtensionDir;   // Extensions available only to your user account
-Platform.systemExtensionDir; // Extensions available to all users on the machine
+Add class paths in preferences!
 
 */
