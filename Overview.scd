@@ -128,4 +128,23 @@ ClassName : InheritsFrom {
 
 Add class paths in preferences!
 
+----------------------------------------------------------------
+
+SERVER EVENTS
+
+ServerBoot.add/remove
+ServerStart.add/remove
+ServerTree.add/remove
+CmdPeriod.add/remove    (clears the server tree)
+
+Things sent to the server (like UGen add) are asynchronous, so you can't perform
+actions on them immediately. Instead, do them in a routine with the s.sync method.
+
+Routine({
+    SynthDef(\ugen, {}).add;
+    s.sync;
+    Synth.new(\ugen);
+})
+
+
 */
