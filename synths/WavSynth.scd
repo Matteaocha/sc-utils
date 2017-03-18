@@ -1,5 +1,5 @@
 (
-SynthDef(\WavSynth, {arg bufnum=0, freq=440, amp=0.5, pos=0.5, atkTime=0.1, relTime=10.0, hpf=0.6, vibDepth=0, vibHz=5, winMul=1.0;
+SynthDef(\WavSynth, {arg bufnum=0, freq=440, amp=0.5, pos=0.5, atkTime=0.1, relTime=10.0, hpf=0.6, vibDepth=0, vibHz=5, winMul=1.0, out=0;
 
 			var sig, env, ratio, trate, clk, pan, winStart, winLen, vib;
 
@@ -17,6 +17,6 @@ SynthDef(\WavSynth, {arg bufnum=0, freq=440, amp=0.5, pos=0.5, atkTime=0.1, relT
 	        sig = TGrains.ar(2, clk, bufnum, ratio*vib, winStart, winLen, pan, 0.5)!2;
 			sig = sig*env;
 			sig = HPF.ar(sig, freq*hpf);
-			Out.ar(0, sig!2)
+			Out.ar(out, sig!2)
 }).add;
 )

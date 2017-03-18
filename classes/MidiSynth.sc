@@ -2,7 +2,7 @@ MidiSynth {
 
 	var dev, chann, synthDef, allNotes, bendval,
 	synthargs, noteOnFunc, noteOffFunc,
-	noteBendFunc, cmdPeriodFunc, serverTreeFunc, gate, group;
+	noteBendFunc, cmdPeriodFunc, serverTreeFunc, serverQuitFunc, gate, group;
 
 	*new { |synthdef, args, gated=false, device=nil, channel=nil|
 		if(args == nil,
@@ -33,8 +33,13 @@ MidiSynth {
 		noteBendFunc = {|src, chan, val| this.noteBend(src, chan, val)};
 		cmdPeriodFunc = { this.cmdPeriod() };
 		serverTreeFunc = { this.serverTree() };
+		serverQuitFunc = { this.serverQuit() };
 
 		this.connect();
+	}
+
+	serverQuit {
+		this.disconnect();
 	}
 
 	cmdPeriod {
@@ -52,6 +57,7 @@ MidiSynth {
 		MIDIIn.addFuncTo(\bend, noteBendFunc);
 		CmdPeriod.add(cmdPeriodFunc);
 		ServerTree.add(serverTreeFunc);
+		ServerQuit.add(serverQuitFunc);
 	}
 
 	disconnect {
@@ -60,6 +66,7 @@ MidiSynth {
 		MIDIIn.removeFuncFrom(\bend, noteBendFunc);
 		CmdPeriod.remove(cmdPeriodFunc);
 		ServerTree.remove(serverTreeFunc);
+		ServerQuit.remove(serverQuitFunc);
 		128.do({|i| allNotes[i] = nil});
 	}
 
