@@ -13,8 +13,6 @@ MidiPattern {
 
 	init { |args, quant, release, device, channel|
 
-		var treeFunc;
-
 		allPatterns = Array.newClear(128);
 		bendval = 1;
 		dev = device;
@@ -61,34 +59,27 @@ MidiPattern {
 	}
 
 	noteOn { |src, chan, num, vel|
-		var pArgs = [
-			\root, num-48,
-			\amp, vel/128,
-			\bend, bendval
-		] ++ patternArgs;
 		if(num != nil, {
 			if(dev == nil, {
-				allPatterns[num] = Pbind(*pArgs).play(quant: pQuant);
+				this.doNoteOn(num, vel);
 			}, {
 				if(dev == src, {
 					if(chann == chan, {
-						allPatterns[num] = Pbind(*pArgs).play(quant: pQuant);
+						this.doNoteOn(num, vel);
 					})
 				})
 			});
 		});
 	}
 
-	noteOff { |src, chan, num, vel|
+	noteOff { |src, chan, num|
 		if(num != nil, {
 			if(dev == nil, {
-				if(rel, { allPatterns[num].stop() });
-				allPatterns[num] = nil;
+				this.doNoteOff(num);
 			}, {
 				if(dev == src, {
 					if(chann == chan, {
-						if(rel, { allPatterns[num].stop() });
-						allPatterns[num] = nil;
+						this.doNoteOff(num);
 					})
 				})
 			})
@@ -96,6 +87,26 @@ MidiPattern {
 	}
 
 	noteBend { |src, chan, val|
+		this.doBend(val);
+	}
+
+
+	doNoteOn { |num, vel|
+		var pArgs = [
+			\root, num-48,
+			\amp, vel/128,
+			\bend, bendval
+		] ++ patternArgs;
+		allPatterns[num] = Pbind(*pArgs).play(quant: pQuant);
+	}
+
+	doNoteOff { |num|
+		if(rel, { allPatterns[num].stop() });
+		allPatterns[num] = nil;
+	}
+
+	doBend { |val|
 		bendval = 1 + (val - 8192) * 2.0/16383;
+		group.set(\bend, bendval);
 	}
 }

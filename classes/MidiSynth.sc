@@ -13,8 +13,6 @@ MidiSynth {
 
 	init { |synthdef, args, gated, device, channel|
 
-		var treeFunc;
-
 		allNotes = Array.newClear(128);
 		synthDef = synthdef;
 		bendval = 1;
@@ -26,7 +24,6 @@ MidiSynth {
 
 		MIDIClient.init;
 		MIDIIn.connectAll;
-
 
 		noteOnFunc = {|src, chan, num, vel| this.noteOn(src, chan, num, vel)};
 		noteOffFunc = {|src, chan, num, vel| this.noteOff(src, chan, num, vel)};
@@ -73,39 +70,25 @@ MidiSynth {
 	noteOn { |src, chan, num, vel|
 		if(num != nil, {
 			if(dev == nil, {
-				allNotes[num] = Synth(synthDef, [
-					\freq, num.midicps,
-					\note, num,
-					\amp, vel/128
-					] ++ synthargs,
-					group
-				);
+				this.doNoteOn(num, vel);
 			}, {
 				if(dev == src, {
 					if(chann == chan, {
-						allNotes[num] = Synth(synthDef, [
-							\freq, num.midicps,
-							\note, num,
-							\amp, vel/128
-							] ++ synthargs,
-							group
-						);
+						this.doNoteOn(num, vel);
 					})
 				})
 			});
 		});
 	}
 
-	noteOff { |src, chan, num, vel|
+	noteOff { |src, chan, num|
 		if(num != nil, {
 			if(dev == nil, {
-				if(gate, {allNotes[num].release()});
-				allNotes[num] = nil;
+				this.doNoteOff(num);
 			}, {
 				if(dev == src, {
 					if(chann == chan, {
-						if(gate, {allNotes[num].release()});
-						allNotes[num] = nil;
+						this.doNoteOff(num);
 					})
 				})
 			})
@@ -113,15 +96,34 @@ MidiSynth {
 	}
 
 	noteBend { |src, chan, val|
-		bendval = 1 + (val - 8192) * 2.0/16383;
 		if(dev == nil, {
-			group.set(\bend, bendval);
+			this.doBend(val);
 		}, {
 			if(dev == src, {
 				if(chann == chan, {
-					group.set(\bend, bendval);
+					this.doBend(val);
 				})
 			});
 		});
+	}
+
+	doNoteOn { |num, vel|
+		allNotes[num] = Synth(synthDef, [
+			\freq, num.midicps,
+			\note, num,
+			\amp, vel/128
+			] ++ synthargs,
+			group
+		);
+	}
+
+	doNoteOff { |num|
+		if(gate, {allNotes[num].release()});
+		allNotes[num] = nil;
+	}
+
+	doBend { |val|
+		bendval = 1 + (val - 8192) * 2.0/16383;
+		group.set(\bend, bendval);
 	}
 }
