@@ -147,4 +147,16 @@ Routine({
 })
 
 
+---------------------------------------------------------------
+
+PATHS
+
+~moduleDir = PathName(thisProcess.nowExecutingPath).parentPath;
+
+Place this in your module to get the directory of the file
+
+"modulename.scd".loadPaths
+
+This will execute the file. (As long as RUN) is placed in a comment at the top
+
 */
