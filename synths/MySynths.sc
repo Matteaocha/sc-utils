@@ -6,6 +6,7 @@ MySynths {
 		MySynths.recorder();
 		MySynths.playSample();
 		MySynths.reverb();
+		MySynths.bell();
 	}
 
 	*wavSynth {
@@ -57,15 +58,49 @@ MySynths {
 	}
 
 	*reverb {
-		SynthDef(\Reverb, {
-			arg in, out, roomsize=10, revtime=3, damping=0.5, inputbw=0.5,
-			spread=15, drylevel=1, earlyreflevel=0.7, taillevel=0.5, mul=0.5;
-			var sig = In.ar(in, 2);
-			Out.ar(out,
-				GVerb.ar(sig, roomsize, revtime, damping,
-					inputbw, spread, drylevel, earlyreflevel, taillevel, mul: mul
-				)
-			);
+		SynthDef("Reverb", {
+			arg in, out=0, predelay=0.1, revtime=1.8, lpf=4500, mix=0.5, amp=1.0;
+
+			var dry, wet, temp, sig;
+
+			dry = In.ar(in, 2);
+			wet = 0;
+			temp = In.ar(in, 2);
+			temp = DelayN.ar(temp, delaytime: predelay);
+
+			16.do({
+				temp = AllpassN.ar(temp, 0.05, {Rand(0.001, 0.05)}!2, revtime);
+				temp = LPF.ar(temp, lpf);
+				wet = wet + temp;
+			});
+			sig = XFade2.ar(dry, wet, mix*2 -1, amp);
+			Out.ar(out, sig);
 		}).add;
+	}
+
+	*bell {
+		SynthDef(\Bell, {
+			arg freq=220, amp=0.5, modHarm=7, modDev=2, modAmp=5, atk=1, hld=3, rel=2, out=0;
+
+			var freqarray, sig, mod, sigenv, filterenv, passenv, lfo, freqenv;
+
+			freqarray = [1/2, 1, 7.midiratio, 2]*freq;
+
+			mod = SinOsc.ar(freqarray*(modHarm+(0.02*modDev)), amp*0.3*{LinRand(0.2, 0.5)}!4*modAmp);
+			sig = SinOsc.ar(freqarray, mod)*amp*0.3*[0.5, 1.0, 0.7, 0.4];
+
+			sigenv = EnvGen.kr(Env.perc(releaseTime: 2), doneAction: 2);
+
+			sig = sig*sigenv;
+			sig = Mix.new(sig);
+
+			filterenv = SinOsc.kr(3, mul: 0.3, add:1.0)*sigenv;
+			sig = HPF.ar(sig, freq*1.5*filterenv);
+
+			sig = Pan2.ar(sig, Rand(-1.0, 1.0));
+
+			Out.ar(out, sig);
+			}
+		).add;
 	}
 }

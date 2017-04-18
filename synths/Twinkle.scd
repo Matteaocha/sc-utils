@@ -1,5 +1,5 @@
 (
-SynthDef(\Twinkle, { arg freq=220, amp=0.5, modHarm=7, modDev=2, modAmp=5, atk=1, hld=3, rel=2;
+SynthDef(\Twinkle, { arg freq=220, amp=0.5, modHarm=7, modDev=2, modAmp=5, atk=1, hld=3, rel=2, out=0;
 
 	var freqarray, sig, mod, sigenv, filterenv, passenv, lfo, freqenv;
 
@@ -18,7 +18,7 @@ SynthDef(\Twinkle, { arg freq=220, amp=0.5, modHarm=7, modDev=2, modAmp=5, atk=1
 
 	sig = Pan2.ar(sig, Rand(-1.0, 1.0));
 
-	Out.ar(0, sig);
+	Out.ar(out, sig);
 }
 ).add
 
