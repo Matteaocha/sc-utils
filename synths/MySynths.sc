@@ -49,11 +49,15 @@ MySynths {
 	}
 
 	*playSample {
-		SynthDef(\PlaySample, {|freq=440, sampleFreq=880, buf, amp=1.0, lfoAmp=0, bend=0|
-			var sig, lfo;
-			lfo = SinOsc.kr(8*bend, mul: lfoAmp, add: 1);
-			sig = PlayBuf.ar(buf.numChannels, buf, (freq/sampleFreq), doneAction: 2);
-			Out.ar(0, sig*lfo);
+		SynthDef(\PlaySample, {|freq=440, sampleFreq=440, buf, startPos=0, atk=0.01, rel=1, amp=1.0, out=0|
+			var sig, env, bufStart, rate;
+
+			bufStart = BufFrames.kr(buf)*startPos;
+			rate = freq/sampleFreq;
+
+			env = EnvGen.kr(Env.perc(atk, rel*rate.min(1)), doneAction: 2);
+			sig = PlayBuf.ar(buf.numChannels, buf, rate, startPos: bufStart)!2;
+			Out.ar(0, sig*env);
 		}).add;
 	}
 
