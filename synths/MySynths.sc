@@ -2,11 +2,11 @@ MySynths {
 
 	*addAll {
 		MySynths.wavSynth();
-		MySynths.router();
 		MySynths.recorder();
 		MySynths.playSample();
 		MySynths.reverb();
 		MySynths.bell();
+		MySynths.grainDelay();
 	}
 
 	*wavSynth {
@@ -31,12 +31,6 @@ MySynths {
 			sig = sig*env;
 			sig = HPF.ar(sig, freq*hpf);
 			Out.ar(out, sig!2)
-		}).add;
-	}
-
-	*router {
-		SynthDef(\Router, { |in, out|
-			Out.ar(out, In.ar(in));
 		}).add;
 	}
 
@@ -106,5 +100,25 @@ MySynths {
 			Out.ar(out, sig);
 			}
 		).add;
+	}
+
+	* grainDelay {
+		SynthDef(\GrainDelay, {|in, amp=1, len=3, pitch=1, rate=60, grainSize=0.2, stereoWidth=0.2, out=0|
+			var buf, buflen, clk, pan, winLen, winStartMin, winStartMax, winStart, sig;
+
+			buflen = 44100 * len;
+			buf = LocalBuf(buflen);
+			RecordBuf.ar(In.ar(in), buf);
+
+			clk = Impulse.kr(rate);
+			pan = WhiteNoise.kr(stereoWidth, -1*(stereoWidth/2));
+			winLen = len * grainSize;
+			winStartMin = 0;
+			winStartMax = len - winLen;
+			winStart = TRand.kr(winStartMin, winStartMax, clk);
+
+			sig = GrainBuf.ar(2, clk, winLen, buf, pitch, winStart, 2, pan)*0.5;
+			Out.ar(out, sig * amp);
+		}).add;
 	}
 }
